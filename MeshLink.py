@@ -95,12 +95,12 @@ def onReceive(packet, interface):
                     interface.sendText(str(time.localtime()),channelIndex=send_channel_index)
                 
                 elif (noprefix.startswith("weather")):
-                    response = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+weather_lat+"&longitude="+weather_long+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime")
+                    response = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+weather_lat+"&longitude="+weather_long+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto")
                     weather_data = response.json()
                     final_weather = ""
                     if (response.ok):
                         for i in range(max_weather_hours):
-                            final_weather += str(round(weather_data["hourly"]["temperature_2m"][i]))+"t "+str(weather_data["hourly"]["precipitation_probability"][i])+"p\n"
+                            final_weather +=  str(weather_data["hourly"]["time"][i])[-5:-3]+"h "+str(round(weather_data["hourly"]["temperature_2m"][i]))+"°F "+str(weather_data["hourly"]["precipitation_probability"][i])+"%\n"
                     else:
                         final_weather += "error fetching"
                     print(final_weather)
