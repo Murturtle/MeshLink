@@ -1,14 +1,14 @@
-max_message_length: 170 #max discord -> mesh message length
-channel_id: 123456789012345 # discord channel id
-token: "TOKEN" # discord bot token - DO NOT SHARE
-prefix: "?" #mesh command prefix
-discord_prefix: "$" #discord prefix
+max_message_length: 170 # max discord -> mesh message length
+channel_ids: [ 123456789012345 ] # seperate more by commas
+token: "asdfasdfasdfasdf" # discord bot token - DO NOT SHARE
+prefix: "$" # mesh command prefix
+discord_prefix: "$" # discord prefix
 use_serial: True
-radio_ip: "192.168.1.100"
+radio_ip: "192.168.1.169"
 send_channel_index: 0
-ignore_self: True #dont show your own node in the mesh
-send_packets: True #show all data not just messages
-verbose_packets: True #should the full packet data be shown in the console
+ignore_self: True # dont show your own node in the mesh
+send_packets: True # show all data not just messages
+verbose_packets: True # should the full packet data be shown in the console
 weather_lat: "45.51"
 weather_long: "-122.68"
 max_weather_hours: 4 # how many hours ahead to send weather info for
