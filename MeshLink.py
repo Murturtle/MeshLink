@@ -1,7 +1,7 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 0
+rev = 1
 import yaml
 import os
 from pubsub import pub
@@ -17,7 +17,7 @@ with open("./config.yml",'r') as file:
 
 config_options = [
     "max_message_length",
-    "channel_id",
+    "channel_ids",
     "token",
     "prefix",
     "discord_prefix",
@@ -34,8 +34,12 @@ config_options = [
 
 for i in config_options:
     if i not in config:
-        print("Config option "+i+" missing in config.yml")
+        print("Config option "+i+" missing in config.yml (check github for example)")
         exit()
+
+for i in config:
+    if i not in config_options:
+        print("Config option "+i+" is not needed anymore")
 
 oversion = requests.get(update_check_url)
 if(oversion.ok):
@@ -52,7 +56,8 @@ def send_msg(message):
     global config
     print(message)
     if (client._ready):
-        asyncio.run_coroutine_threadsafe(client.get_channel(config["channel_id"]).send(message),client.loop)
+        for i in config["channel_ids"]:
+            asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
 def onConnection(interface, topic=pub.AUTO_TOPIC):
         interface.sendText("ready",channelIndex = config["send_channel_index"])
@@ -142,7 +147,7 @@ else:
 @client.event
 async def on_ready():   
     print('Logged in as {0.user}'.format(client))
-    await client.get_channel(config["channel_id"]).send("ready")
+    send_msg("ready")
 
 
 @client.event
@@ -151,7 +156,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.content.startswith(config["discord_prefix"]+'send'):
-        if (message.channel.id == config["channel_id"]):
+        if (message.channel.id in config["channel_ids"]):
             await message.channel.typing()
             trunk_message = message.content[len(config["discord_prefix"]+"send"):]
             final_message = message.author.name+">"+ trunk_message
