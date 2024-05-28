@@ -21,7 +21,7 @@ weather
 
 ## Setup 
 
- 1. Download the python script from Github
+ 1. Download the python script and config.yml from Github
  2. Install the Meshtastic python CLI https://meshtastic.org/docs/software/python/cli/installation/
  3. Install discord py https://discordpy.readthedocs.io/en/latest/intro.html
  4. Create a discord bot https://discord.com/developers
