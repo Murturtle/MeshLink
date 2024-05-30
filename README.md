@@ -6,6 +6,7 @@
  ### Mesh only
  - Weather forecast
  - Ping
+ - HF condition checker
 
 ### WIP
 - SOS
@@ -18,6 +19,7 @@ send (message)
 ### Mesh
 ping
 weather
+hf
 
 ## Setup 
 
