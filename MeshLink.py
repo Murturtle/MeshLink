@@ -1,8 +1,9 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 1
+rev = 2
 import yaml
+import xml.dom.minidom
 import os
 from pubsub import pub
 import discord
@@ -65,7 +66,7 @@ def onConnection(interface, topic=pub.AUTO_TOPIC):
 def genUserName(interface, packet):
     if(packet["fromId"] in interface.nodes):
         if(interface.nodes[packet["fromId"]]["user"]):
-            ret = str("`"+str(interface.nodes[packet["fromId"]]["user"]["shortName"]))+" "+packet["fromId"]+"` *"+str(interface.nodes[packet["fromId"]]["user"]["longName"]+"*")
+            ret = str("`"+str(interface.nodes[packet["fromId"]]["user"]["shortName"]))+" "+packet["fromId"]+"` "+str(interface.nodes[packet["fromId"]]["user"]["longName"])
         else:
             ret = str(packet["fromId"])
         if("position" in interface.nodes[packet["fromId"]]):
@@ -124,6 +125,18 @@ def onReceive(packet, interface):
                         final_weather += "error fetching"
                     print(final_weather)
                     interface.sendText(final_weather,channelIndex=config["send_channel_index"])
+                
+                elif (noprefix.startswith("hf")):
+                    final_hf = ""
+                    solar = requests.get("https://www.hamqsl.com/solarxml.php")
+                    if(solar.ok):
+                        solarxml = xml.dom.minidom.parseString(solar.text)
+                        for i in solarxml.getElementsByTagName("band"):
+                            final_hf += i.getAttribute("time")[0]+i.getAttribute("name") +" "+str(i.childNodes[0].data) 
+                    else:
+                        final_hf += "error fetching"
+                    print(final_hf)
+                    interface.sendText(final_hf,channelIndex=config["send_channel_index"])
 
         else:
             if(config["send_packets"]):
