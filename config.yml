@@ -12,3 +12,5 @@ verbose_packets: True # should the full packet data be shown in the console
 weather_lat: "45.51"
 weather_long: "-122.68"
 max_weather_hours: 4 # how many hours ahead to send weather info for
+ping_on_messages: True
+message_role: "@here"
