@@ -24,7 +24,6 @@ with open("./config.yml",'r') as file:
 
 config_options = [
     "max_message_length",
-    "channel_ids",
     "message_channel_ids",
     "info_channel_ids",
     "token",
@@ -179,7 +178,7 @@ def onReceive(packet, interface):
                 if((packet["fromId"] == interface.getMyNodeInfo()["user"]["id"]) & config["ignore_self"]):
                     print("Ignoring self")
                 else:
-                    final_message+=genUserName(interface,packet)+"> "+str(packet["decoded"]["portnum"])
+                    final_message+=genUserName(interface,packet)+" > "+str(packet["decoded"]["portnum"])
             send_info(final_message)
     else:
         final_message+=genUserName(interface,packet)+"> encrypted/failed"
