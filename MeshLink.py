@@ -7,6 +7,7 @@ import xml.dom.minidom# dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
 rev = 4
+
 import yaml
 import xml.dom.minidom
 import os
@@ -138,11 +139,12 @@ def onReceive(packet, interface):
                     interface.sendText("ping\n"
                                        +"time\n"
                                        +"weather\n"
-                                       +"hf"
+                                       +"hf\n"
+                                       +"sos"
                                        ,channelIndex=config["send_channel_index"])
                 
                 elif (noprefix.startswith("time")):
-                    interface.sendText(str(time.localtime()),channelIndex=config["send_channel_index"])
+                    interface.sendText(time.strftime('%H:%M:%S'),channelIndex=config["send_channel_index"])
                 
                 elif (noprefix.startswith("weather")):
                     weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime")
@@ -231,4 +233,3 @@ except discord.HTTPException as e:
         print("too many requests")
     else:
         raise e
-    
