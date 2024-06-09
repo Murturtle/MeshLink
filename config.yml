@@ -1,5 +1,6 @@
 max_message_length: 170 # max discord -> mesh message length
-channel_ids: [ 123456789012345 ] # seperate more by commas
+info_channel_ids: [ 123456789012345 ] # seperate more by commas
+message_channel_ids: [ 123456789012345 ] # can be the same as info_channel_ids
 token: "asdfasdfasdfasdf" # discord bot token - DO NOT SHARE
 prefix: "$" # mesh command prefix
 discord_prefix: "$" # discord prefix
@@ -12,5 +13,5 @@ verbose_packets: True # should the full packet data be shown in the console
 weather_lat: "45.51"
 weather_long: "-122.68"
 max_weather_hours: 4 # how many hours ahead to send weather info for
-ping_on_messages: True
+ping_on_messages: False
 message_role: "@here"
