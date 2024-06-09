@@ -67,8 +67,6 @@ def send_msg(message):
     if (client._ready):
         for i in config["message_channel_ids"]:
             asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
-        for i in config["info_channel_ids"]:
-            asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
 def send_info(message):
     global config
