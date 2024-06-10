@@ -1,7 +1,7 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 3
+rev = 4
 import yaml
 import xml.dom.minidom
 import os
@@ -18,7 +18,8 @@ with open("./config.yml",'r') as file:
 
 config_options = [
     "max_message_length",
-    "channel_ids",
+    "message_channel_ids",
+    "info_channel_ids",
     "token",
     "prefix",
     "discord_prefix",
@@ -58,7 +59,14 @@ def send_msg(message):
     global config
     print(message)
     if (client._ready):
-        for i in config["channel_ids"]:
+        for i in config["message_channel_ids"]:
+            asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
+
+def send_info(message):
+    global config
+    print(message)
+    if (client._ready):
+        for i in config["info_channel_ids"]:
             asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
 def asdf(a):
@@ -158,20 +166,17 @@ def onReceive(packet, interface):
                         final_hf += "error fetching"
                     print(final_hf)
                     interface.sendText(final_hf,channelIndex=config["send_channel_index"])
-                
-                elif(noprefix.startswith("s")):
-                    send_msg("@everyone "+genUserName(interface,packet)+" # test")
-
+            send_msg(final_message)
         else:
             if(config["send_packets"]):
                 if((packet["fromId"] == interface.getMyNodeInfo()["user"]["id"]) & config["ignore_self"]):
                     print("Ignoring self")
                 else:
-                    final_message+=genUserName(interface,packet)+"> "+str(packet["decoded"]["portnum"])
-        send_msg(final_message)
+                    final_message+=genUserName(interface,packet)+" > "+str(packet["decoded"]["portnum"])
+            send_info(final_message)
     else:
         final_message+=genUserName(interface,packet)+"> encrypted/failed"
-        send_msg(final_message)
+        send_info(final_message)
         print("failed or encrypted")
 
 
@@ -197,7 +202,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.content.startswith(config["discord_prefix"]+'send'):
-        if (message.channel.id in config["channel_ids"]):
+        if (message.channel.id in config["message_channel_ids"]):
             await message.channel.typing()
             trunk_message = message.content[len(config["discord_prefix"]+"send"):]
             final_message = message.author.name+">"+ trunk_message
@@ -221,4 +226,3 @@ except discord.HTTPException as e:
         print("too many requests")
     else:
         raise e
-    
