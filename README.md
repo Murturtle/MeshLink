@@ -2,11 +2,13 @@
 ## Features
 
  - Send messages to and from discord
+ - Send packet information to discord
  
  ### Mesh only
  - Weather forecast
  - Ping
  - HF condition checker
+ - Time
 
 ### WIP
 - SOS
@@ -20,6 +22,7 @@ send (message)
 ping
 weather
 hf
+time
 
 ## Setup 
 
