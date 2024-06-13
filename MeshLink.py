@@ -82,23 +82,26 @@ def onConnection(interface, topic=pub.AUTO_TOPIC):
 
     #print(a)
 
-def genUserName(interface, packet):
+def genUserName(interface, packet, details=True):
     if(packet["fromId"] in interface.nodes):
         if(interface.nodes[packet["fromId"]]["user"]):
-            ret = str("`"+str(interface.nodes[packet["fromId"]]["user"]["shortName"]))+" "+packet["fromId"]+"` "+str(interface.nodes[packet["fromId"]]["user"]["longName"])
+            ret = "`"+str(interface.nodes[packet["fromId"]]["user"]["shortName"])+" "
+            if details:
+                ret+= packet["fromId"]+" "
+            ret+= str(interface.nodes[packet["fromId"]]["user"]["longName"])+"`"
         else:
             ret = str(packet["fromId"])
-        if("position" in interface.nodes[packet["fromId"]]):
-            if("latitude" in interface.nodes[packet["fromId"]]["position"] and "longitude" in interface.nodes[packet["fromId"]]["position"]):
-                ret +=" [map](<https://www.google.com/maps/search/?api=1&query="+str(interface.nodes[packet["fromId"]]["position"]["latitude"])+"%2C"+str(interface.nodes[packet["fromId"]]["position"]["longitude"])+">)"
-        
-        
+
+        if details:    
+            if("position" in interface.nodes[packet["fromId"]]):
+                if("latitude" in interface.nodes[packet["fromId"]]["position"] and "longitude" in interface.nodes[packet["fromId"]]["position"]):
+                    ret +=" [map](<https://www.google.com/maps/search/?api=1&query="+str(interface.nodes[packet["fromId"]]["position"]["latitude"])+"%2C"+str(interface.nodes[packet["fromId"]]["position"]["longitude"])+">)"
+            
         if("hopLimit" in packet):
             if("hopStart" in packet):
                 ret+=" `"+str(packet["hopStart"]-packet["hopLimit"])+"`/`"+str(packet["hopStart"])+"`"
             else:
                 ret+=" `"+str(packet["hopLimit"])+"`"
-        
         return ret
     else:
         return "`"+str(packet["fromId"])+"`"
@@ -114,10 +117,10 @@ def onReceive(packet, interface):
         
         print("decoded")
         if(packet["decoded"]["portnum"] == "TEXT_MESSAGE_APP"):
-            final_message += genUserName(interface,packet)
+            final_message += genUserName(interface,packet,details=False)
 
             text = packet["decoded"]["text"]
-            final_message += "> "+text
+            final_message += " > "+text
             
             if(config["ping_on_messages"]):
                 final_message += "\n||"+config["message_role"]+"||"
@@ -175,11 +178,9 @@ def onReceive(packet, interface):
                     final_message+=genUserName(interface,packet)+" > "+str(packet["decoded"]["portnum"])
             send_info(final_message)
     else:
-        final_message+=genUserName(interface,packet)+"> encrypted/failed"
+        final_message+=genUserName(interface,packet)+" > encrypted/failed"
         send_info(final_message)
         print("failed or encrypted")
-
-
 
 
 pub.subscribe(onConnection, "meshtastic.connection.established")
@@ -193,8 +194,6 @@ else:
 async def on_ready():   
     print('Logged in as {0.user}'.format(client))
     #send_msg("ready")
-
-
 
 @client.event
 async def on_message(message):
