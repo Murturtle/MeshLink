@@ -1,7 +1,7 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 4
+rev = 5
 import yaml
 import xml.dom.minidom
 import os
@@ -9,6 +9,7 @@ from pubsub import pub
 import discord
 from meshtastic.tcp_interface import TCPInterface
 from meshtastic.serial_interface import SerialInterface
+from meshtastic.portnums_pb2 import *
 import asyncio
 import time
 import requests
@@ -34,6 +35,7 @@ config_options = [
     "max_weather_hours",
     "ping_on_messages",
     "message_role",
+    "use_discord",
 ]
 
 for i in config_options:
@@ -53,27 +55,33 @@ if(oversion.ok):
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
+if config["use_discord"]:
+    client = discord.Client(intents=intents)
+else:
+    client = None
 
 def send_msg(message):
     global config
     print(message)
-    if (client._ready):
-        for i in config["message_channel_ids"]:
-            asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
+    if config["use_discord"]:
+        if (client._ready):
+            for i in config["message_channel_ids"]:
+                asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
 def send_info(message):
     global config
     print(message)
-    if (client._ready):
-        for i in config["info_channel_ids"]:
-            asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
+    if config["use_discord"]:
+        if (client._ready):
+            for i in config["info_channel_ids"]:
+                asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
 def asdf(a):
     print("ACK")
     print(a)
 
 def onConnection(interface, topic=pub.AUTO_TOPIC):
+
     print("Node ready")
     interface.sendText("ready",channelIndex = config["send_channel_index"])
     #a = interface.sendText("hola!")
@@ -132,15 +140,16 @@ def onReceive(packet, interface):
                     interface.sendText("pong",channelIndex=config["send_channel_index"])
                 
                 elif (noprefix.startswith("help")):
-                    interface.sendText("ping\n"
+                    interface.sendText("<- Help ->\n"
+                                       +"ping\n"
                                        +"time\n"
                                        +"weather\n"
                                        +"hf\n"
-                                       +"sos"
-                                       ,channelIndex=config["send_channel_index"])
+                                       +"mesh"
+                                       ,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
                 
                 elif (noprefix.startswith("time")):
-                    interface.sendText(time.strftime('%H:%M:%S'),channelIndex=config["send_channel_index"])
+                    interface.sendText(time.strftime('%H:%M:%S'),channelIndex=config["send_channel_index"],destinationId=packet["toId"])
                 
                 elif (noprefix.startswith("weather")):
                     weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime")
@@ -155,7 +164,7 @@ def onReceive(packet, interface):
                     else:
                         final_weather += "error fetching"
                     print(final_weather)
-                    interface.sendText(final_weather,channelIndex=config["send_channel_index"])
+                    interface.sendText(final_weather,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
                 
                 elif (noprefix.startswith("hf")):
                     final_hf = ""
@@ -168,11 +177,33 @@ def onReceive(packet, interface):
                     else:
                         final_hf += "error fetching"
                     print(final_hf)
-                    interface.sendText(final_hf,channelIndex=config["send_channel_index"])
+                    interface.sendText(final_hf,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                
+                elif (noprefix.startswith("mesh")):
+                    final_mesh = "<- Mesh Stats ->"
+
+                    # channel util
+                    nodes_with_chutil = 0
+                    total_chutil = 0
+                    for i in interface.nodes:
+                        a = interface.nodes[i]
+                        if "deviceMetrics" in a:
+                            if "channelUtilization" in a['deviceMetrics']:
+                                nodes_with_chutil += 1
+                                total_chutil += a['deviceMetrics']["channelUtilization"]
+                    final_mesh += "\n chutil avg: " + total_chutil / nodes_with_chutil
+
+                    # temperature average
+                    for i in interface.nodes:
+                        a = interface.nodes[i]
+
+                    interface.sendText(final_mesh,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                
+                # interface.sendText("test",channelIndex=config["send_channel_index"],destinationId=packet["toId"])
             send_msg(final_message)
         else:
             if(config["send_packets"]):
-                if((packet["fromId"] == interface.getMyNodeInfo()["user"]["id"]) & config["ignore_self"]):
+                if((packet["fromId"] == interface.getMyNodeInfo()["user"]["id"]) and config["ignore_self"]):
                     print("Ignoring self")
                 else:
                     final_message+=genUserName(interface,packet)+" > "+str(packet["decoded"]["portnum"])
@@ -190,38 +221,42 @@ if (config["use_serial"]):
     interface = SerialInterface()
 else:
     interface = TCPInterface(hostname=config["radio_ip"], connectNow=True)
-@client.event
-async def on_ready():   
-    print('Logged in as {0.user}'.format(client))
-    #send_msg("ready")
 
-@client.event
-async def on_message(message):
-    global interface
-    if message.author == client.user:
-        return
-    if message.content.startswith(config["discord_prefix"]+'send'):
-        if (message.channel.id in config["message_channel_ids"]):
-            await message.channel.typing()
-            trunk_message = message.content[len(config["discord_prefix"]+"send"):]
-            final_message = message.author.name+">"+ trunk_message
-            
-            if(len(final_message) < config["max_message_length"] - 1):
-                await message.reply(final_message)
-                interface.sendText(final_message,channelIndex = config["send_channel_index"])
-                print(final_message)
-            else:
-                await message.reply("(trunked) "+final_message[:config["max_message_length"]])
-                interface.sendText(final_message,channelIndex = config["send_channel_index"])
-                print(final_message[:config["max_message_length"]])
-            
-        else:
+if config["use_discord"]:
+    @client.event
+    async def on_ready():   
+        print('Logged in as {0.user}'.format(client))
+        #send_msg("ready")
+
+    @client.event
+    async def on_message(message):
+        global interface
+        if message.author == client.user:
             return
+        if message.content.startswith(config["discord_prefix"]+'send'):
+            if (message.channel.id in config["message_channel_ids"]):
+                await message.channel.typing()
+                trunk_message = message.content[len(config["discord_prefix"]+"send"):]
+                final_message = message.author.name+">"+ trunk_message
+                
+                if(len(final_message) < config["max_message_length"] - 1):
+                    await message.reply(final_message)
+                    interface.sendText(final_message,channelIndex = config["send_channel_index"])
+                    print(final_message)
+                else:
+                    await message.reply("(trunked) "+final_message[:config["max_message_length"]])
+                    interface.sendText(final_message,channelIndex = config["send_channel_index"])
+                    print(final_message[:config["max_message_length"]])
+                
+            else:
+                return
 
 try:
-    client.run(config["token"])
+    if config["use_discord"]:
+        client.run(config["token"])
+    else:
+        while True:
+            time.sleep(1)
 except discord.HTTPException as e:
     if e.status == 429:
         print("too many requests")
-    else:
-        raise e
