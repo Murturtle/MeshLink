@@ -9,6 +9,7 @@
  - Ping
  - HF condition checker
  - Time
+ - Mesh statistics
 
 ### WIP
 - SOS
@@ -23,6 +24,7 @@ ping
 weather
 hf
 time
+mesh
 
 ## Setup 
 
