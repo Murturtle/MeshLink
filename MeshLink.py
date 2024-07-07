@@ -204,7 +204,6 @@ def onReceive(packet, interface):
                     # total_temp = 0
                     # for i in interface.nodes:
                     #     a = interface.nodes[i]
-                    #     print (a)
                     #     if "environmentMetrics" in a:
                     #         if "temperature" in a['environmentMetrics']:
                     #             nodes_with_temp += 1
