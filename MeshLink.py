@@ -182,7 +182,7 @@ def onReceive(packet, interface):
                 elif (noprefix.startswith("mesh")):
                     final_mesh = "<- Mesh Stats ->"
 
-                    # channel util
+                    # channel utilization
                     nodes_with_chutil = 0
                     total_chutil = 0
                     for i in interface.nodes:
@@ -191,15 +191,32 @@ def onReceive(packet, interface):
                             if "channelUtilization" in a['deviceMetrics']:
                                 nodes_with_chutil += 1
                                 total_chutil += a['deviceMetrics']["channelUtilization"]
-                    final_mesh += "\n chutil avg: " + total_chutil / nodes_with_chutil
 
-                    # temperature average
-                    for i in interface.nodes:
-                        a = interface.nodes[i]
+                    if nodes_with_chutil > 0:
+                        avg_chutil = total_chutil / nodes_with_chutil
+                        avg_chutil = round(avg_chutil, 1)  # Round to the nearest tenth
+                        final_mesh += "\n chutil avg: " + str(avg_chutil)
+                    else:
+                        final_mesh += "\n chutil avg: N/A"
 
-                    interface.sendText(final_mesh,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
-                
-                # interface.sendText("test",channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                    # # temperature average 
+                    # nodes_with_temp = 0
+                    # total_temp = 0
+                    # for i in interface.nodes:
+                    #     a = interface.nodes[i]
+                    #     if "environmentMetrics" in a:
+                    #         if "temperature" in a['environmentMetrics']:
+                    #             nodes_with_temp += 1
+                    #             total_temp += a['environmentMetrics']["temperature"]
+
+                    # if nodes_with_temp > 0:
+                    #     avg_temp = total_temp / nodes_with_temp
+                    #     avg_temp = round(avg_temp, 1)  # Round to the nearest tenth
+                    #     final_mesh += "\n temp avg: " + str(avg_temp)
+                    # else:
+                    #     final_mesh += "\n temp avg: N/A"
+
+                    interface.sendText(final_mesh, channelIndex=config["send_channel_index"], destinationId=packet["toId"])
             send_msg(final_message)
         else:
             if(config["send_packets"]):
