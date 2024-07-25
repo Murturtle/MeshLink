@@ -1,7 +1,7 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 6
+rev = 7
 import yaml
 import xml.dom.minidom
 import os
@@ -36,6 +36,7 @@ config_options = [
     "ping_on_messages",
     "message_role",
     "use_discord",
+    "send_mesh_commands_to_discord",
 ]
 
 for i in config_options:
@@ -215,15 +216,17 @@ def onReceive(packet, interface):
                     #     final_mesh += "\n temp avg: " + str(avg_temp)
                     # else:
                     #     final_mesh += "\n temp avg: N/A"
-
+                    if(config["send_mesh_commands_to_discord"]:
+                        send_msg("`MeshLink` "+final_mesh)
                     interface.sendText(final_mesh, channelIndex=config["send_channel_index"], destinationId=packet["toId"])
             send_msg(final_message)
+            
         else:
             if(config["send_packets"]):
                 if((packet["fromId"] == interface.getMyNodeInfo()["user"]["id"]) and config["ignore_self"]):
                     print("Ignoring self")
                 else:
-                    final_message+=genUserName(interface,packet)+" > "+str(packet["decoded"]["portnum"])
+                    final_message+=genUserName(interface,packet)+" > "+str(packet["decoded"]["portnum"]
             send_info(final_message)
     else:
         final_message+=genUserName(interface,packet)+" > encrypted/failed"
