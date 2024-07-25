@@ -2,6 +2,7 @@ max_message_length: 170 # max discord -> mesh message length
 info_channel_ids: [ 123456789012345 ] # seperate more by commas
 message_channel_ids: [ 123456789012345 ] # can be the same as info_channel_ids
 token: "asdfasdfasdfasdf" # discord bot token - DO NOT SHARE
+send_mesh_commands_to_discord: True
 prefix: "$" # mesh command prefix
 discord_prefix: "$" # discord prefix
 use_serial: True
