@@ -138,19 +138,27 @@ def onReceive(packet, interface):
                 noprefix = text[len(config["prefix"]):]
 
                 if(noprefix.startswith("ping")):
-                    interface.sendText("pong",channelIndex=config["send_channel_index"])
+                    final_ping = "pong"
+                    interface.sendText(final_ping,channelIndex=config["send_channel_index"])
+                    if(config["send_mesh_commands_to_discord"]):
+                            send_msg("`MeshLink`> "+final_help)
                 
                 elif (noprefix.startswith("help")):
-                    interface.sendText("<- Help ->\n"
+                    final_help = "<- Help ->\n"
                                        +"ping\n"
                                        +"time\n"
                                        +"weather\n"
                                        +"hf\n"
                                        +"mesh"
-                                       ,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                    interface.sendText(final_help,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                    if(config["send_mesh_commands_to_discord"]):
+                            send_msg("`MeshLink`> "+final_help)
                 
                 elif (noprefix.startswith("time")):
-                    interface.sendText(time.strftime('%H:%M:%S'),channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                    final_time = time.strftime('%H:%M:%S')
+                    interface.sendText(final_time,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                    if(config["send_mesh_commands_to_discord"]):
+                        send_msg("`MeshLink`> "+final_time)
                 
                 elif (noprefix.startswith("weather")):
                     weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime")
@@ -166,6 +174,8 @@ def onReceive(packet, interface):
                         final_weather += "error fetching"
                     print(final_weather)
                     interface.sendText(final_weather,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                    if(config["send_mesh_commands_to_discord"]):
+                        send_msg("`MeshLink`> "+final_weather)
                 
                 elif (noprefix.startswith("hf")):
                     final_hf = ""
@@ -179,6 +189,10 @@ def onReceive(packet, interface):
                         final_hf += "error fetching"
                     print(final_hf)
                     interface.sendText(final_hf,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+
+                    if(config["send_mesh_commands_to_discord"]):
+                        send_msg("`MeshLink`> "+final_hf)
+                
                 
                 elif (noprefix.startswith("mesh")):
                     final_mesh = "<- Mesh Stats ->"
@@ -199,6 +213,9 @@ def onReceive(packet, interface):
                         final_mesh += "\n chutil avg: " + str(avg_chutil)
                     else:
                         final_mesh += "\n chutil avg: N/A"
+                        
+                    if(config["send_mesh_commands_to_discord"]):
+                        send_msg("`MeshLink`> "+final_mesh)
 
                     # # temperature average 
                     # nodes_with_temp = 0
@@ -216,8 +233,7 @@ def onReceive(packet, interface):
                     #     final_mesh += "\n temp avg: " + str(avg_temp)
                     # else:
                     #     final_mesh += "\n temp avg: N/A"
-                    if(config["send_mesh_commands_to_discord"]):
-                        send_msg("`MeshLink`> "+final_mesh)
+                    
                     interface.sendText(final_mesh, channelIndex=config["send_channel_index"], destinationId=packet["toId"])
                     
             send_msg(final_message)
