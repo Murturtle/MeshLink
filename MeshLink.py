@@ -1,7 +1,7 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 9
+rev = 10
 import yaml
 import xml.dom.minidom
 import os
@@ -144,12 +144,7 @@ def onReceive(packet, interface):
                             send_msg("`MeshLink`> "+final_help)
                 
                 elif (noprefix.startswith("help")):
-                    final_help = "<- Help ->\n"
-                                       +"ping\n"
-                                       +"time\n"
-                                       +"weather\n"
-                                       +"hf\n"
-                                       +"mesh"
+                    final_help = "<- Help ->\n"+"ping\n"+"time\n"+"weather\n"+"hf\n"+"mesh"
                     interface.sendText(final_help,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
                     if(config["send_mesh_commands_to_discord"]):
                             send_msg("`MeshLink`> "+final_help)
