@@ -9,7 +9,7 @@ from pubsub import pub
 import discord
 from meshtastic.tcp_interface import TCPInterface
 from meshtastic.serial_interface import SerialInterface
-from meshtastic.portnums_pb2 import *
+from meshtastic.protobuf import portnums_pb2
 import asyncio
 import time
 import requests
