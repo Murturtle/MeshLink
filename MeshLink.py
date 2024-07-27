@@ -156,7 +156,7 @@ def onReceive(packet, interface):
                         send_msg("`MeshLink`> "+final_time)
                 
                 elif (noprefix.startswith("weather")):
-                    weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime")
+                    weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime&timezone=auto")
                     weather_data = weather_data_res.json()
                     final_weather = ""
                     if (weather_data_res.ok):
