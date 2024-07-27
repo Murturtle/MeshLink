@@ -65,7 +65,7 @@ def send_msg(message):
     global config
     print(message)
     if config["use_discord"]:
-        if (client._ready):
+        if (client.is_ready()):
             for i in config["message_channel_ids"]:
                 asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
@@ -73,7 +73,7 @@ def send_info(message):
     global config
     print(message)
     if config["use_discord"]:
-        if (client._ready):
+        if (client.is_ready()):
             for i in config["info_channel_ids"]:
                 asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
