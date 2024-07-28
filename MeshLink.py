@@ -9,7 +9,7 @@ from pubsub import pub
 import discord
 from meshtastic.tcp_interface import TCPInterface
 from meshtastic.serial_interface import SerialInterface
-from meshtastic.portnums_pb2 import *
+from meshtastic.protobuf import portnums_pb2
 import asyncio
 import time
 import requests
@@ -65,7 +65,7 @@ def send_msg(message):
     global config
     print(message)
     if config["use_discord"]:
-        if (client._ready):
+        if (client.is_ready()):
             for i in config["message_channel_ids"]:
                 asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
@@ -73,7 +73,7 @@ def send_info(message):
     global config
     print(message)
     if config["use_discord"]:
-        if (client._ready):
+        if (client.is_ready()):
             for i in config["info_channel_ids"]:
                 asyncio.run_coroutine_threadsafe(client.get_channel(i).send(message),client.loop)
 
@@ -156,7 +156,7 @@ def onReceive(packet, interface):
                         send_msg("`MeshLink`> "+final_time)
                 
                 elif (noprefix.startswith("weather")):
-                    weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime")
+                    weather_data_res = requests.get("https://api.open-meteo.com/v1/forecast?latitude="+config["weather_lat"]+"&longitude="+config["weather_long"]+"&hourly=temperature_2m,precipitation_probability&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timeformat=unixtime&timezone=auto")
                     weather_data = weather_data_res.json()
                     final_weather = ""
                     if (weather_data_res.ok):
