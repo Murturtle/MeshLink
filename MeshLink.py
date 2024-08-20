@@ -1,7 +1,7 @@
 # dont change unless you are making a fork
 update_check_url = "https://raw.githubusercontent.com/Murturtle/MeshLink/main/rev"
 update_url = "https://github.com/Murturtle/MeshLink"
-rev = 11
+rev = 12
 import yaml
 import xml.dom.minidom
 import os
@@ -84,7 +84,7 @@ def asdf(a):
 def onConnection(interface, topic=pub.AUTO_TOPIC):
 
     print("Node ready")
-    interface.sendText("ready",channelIndex = config["send_channel_index"])
+    interface.sendText("MeashLink is now running - rev "+str(rev)+"\n\n use "+config["prefix"]+"info for a list of commands",channelIndex = config["send_channel_index"])
     #a = interface.sendText("hola!")
     #print(a.id)
     #interface._addResponseHandler(a.id,asdf)
@@ -141,13 +141,13 @@ def onReceive(packet, interface):
                     final_ping = "pong"
                     interface.sendText(final_ping,channelIndex=config["send_channel_index"])
                     if(config["send_mesh_commands_to_discord"]):
-                            send_msg("`MeshLink`> "+final_help)
+                            send_msg("`MeshLink`> "+final_info)
                 
-                elif (noprefix.startswith("help")):
-                    final_help = "<- Help ->\n"+"ping\n"+"time\n"+"weather\n"+"hf\n"+"mesh"
-                    interface.sendText(final_help,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
+                elif (noprefix.startswith("info")):
+                    final_info = "<- info ->\n"+"ping\n"+"time\n"+"weather\n"+"hf\n"+"mesh"
+                    interface.sendText(final_info,channelIndex=config["send_channel_index"],destinationId=packet["toId"])
                     if(config["send_mesh_commands_to_discord"]):
-                            send_msg("`MeshLink`> "+final_help)
+                            send_msg("`MeshLink`> "+final_info)
                 
                 elif (noprefix.startswith("time")):
                     final_time = time.strftime('%H:%M:%S')
@@ -246,14 +246,20 @@ def onReceive(packet, interface):
         print("failed or encrypted")
 
 
+def onDisconnect(interface):
+    init_radio()
+
 pub.subscribe(onConnection, "meshtastic.connection.established")
+pub.subscribe(onDisconnect, "meshtastic.connection.lost")
 pub.subscribe(onReceive, "meshtastic.receive")
-
-if (config["use_serial"]):
-    interface = SerialInterface()
-else:
-    interface = TCPInterface(hostname=config["radio_ip"], connectNow=True)
-
+interface = 0
+def init_radio():
+    global interface
+    if (config["use_serial"]):
+        interface = SerialInterface()
+    else:
+        interface = TCPInterface(hostname=config["radio_ip"], connectNow=True)
+init_radio()
 if config["use_discord"]:
     @client.event
     async def on_ready():   
