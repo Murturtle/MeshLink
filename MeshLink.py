@@ -84,7 +84,7 @@ def asdf(a):
 def onConnection(interface, topic=pub.AUTO_TOPIC):
 
     print("Node ready")
-    interface.sendText("MeashLink is now running - rev "+str(rev)+"\n\n use "+config["prefix"]+"info for a list of commands",channelIndex = config["send_channel_index"])
+    interface.sendText("MeshLink is now running - rev "+str(rev)+"\n\n use "+config["prefix"]+"info for a list of commands",channelIndex = config["send_channel_index"])
     #a = interface.sendText("hola!")
     #print(a.id)
     #interface._addResponseHandler(a.id,asdf)
