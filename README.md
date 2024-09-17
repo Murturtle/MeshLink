@@ -1,4 +1,4 @@
-# MeshLink
+# MeshLink (deprecated)
 # https://github.com/Murturtle/MeshLink
 ## Features
 
