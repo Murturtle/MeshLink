@@ -1,5 +1,5 @@
 # MeshLink (deprecated)
-# https://github.com/Murturtle/MeshLink
+# https://github.com/Murturtle/MeshLinkBeta
 ## Features
 
  - Send messages to and from discord
